@@ -39,6 +39,8 @@ app.use('/api/v1/chatbot',       chatbotRoutes);
 app.use('/api/v1/vc',       vcRoutes);
 app.use('/api/v1/admin',       adminRoutes);
 
+app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() }));
+
 app.get('/', (req, res) => res.send('SUATS API is running...'));
 
 export default app;
