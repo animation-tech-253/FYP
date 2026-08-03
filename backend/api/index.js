@@ -2,14 +2,20 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import app from '../src/app.js';
 
-let connected = false;
+let connectingPromise = null;
 
-app.use(async (req, res, next) => {
-  if (!connected) {
-    await mongoose.connect(process.env.MONGODB_URL);
-    connected = true;
+async function ensureDbConnected() {
+  if (mongoose.connection.readyState === 1) return;
+  if (!connectingPromise) {
+    connectingPromise = mongoose.connect(process.env.MONGODB_URL).catch((err) => {
+      connectingPromise = null;
+      throw err;
+    });
   }
-  next();
-});
+  await connectingPromise;
+}
 
-export default app;
+export default async function handler(req, res) {
+  await ensureDbConnected();
+  app(req, res);
+}
